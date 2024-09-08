@@ -4,5 +4,5 @@
 - Figura
     Presionar la tecla [s] para guardar el output
 
-    ![Figura](./output.bmp)
+    ![Figura](./raytracer/output.bmp)
 
