@@ -5,6 +5,7 @@
 #mtriz de identidad
 #inversa de una matriz
 import re
+from tkinter import N
 import numpy as np
 from math import e, pi, sin, cos, sqrt, isclose
 
@@ -234,3 +235,14 @@ def sumVectors(v1, v2):
 def multiplyVectorScalar(vector, scalar):
     result = [element * scalar for element in vector]
     return result
+
+def reflectVector(normal, direccion):
+    #las direcciones siempre tienen que estar normalizadas
+    # normal = normalizarVector(normal)
+    # direccion = normalizarVector(direccion)
+    # R = 2* (N . L) * N - L #l es la luz
+    reflect = 2* ProductoPunto(normal, direccion)
+    reflect = multiplyVectorScalar(normal, reflect)
+    reflect = subtract(reflect, direccion)
+    reflect = normalizarVector(reflect)
+    return reflect# subtract(direccion, multiplyVectorScalar(normal, 2 * ProductoPunto(direccion, normal)))

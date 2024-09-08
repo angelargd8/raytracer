@@ -46,19 +46,20 @@ class RendererRT(object):
 		self.scene = [] #listado de objetos en la escena
 		self.lights = [] #listado de luces en la escena, para escenas con multiples luces
 		
-	def glCastRay(self, orig, direction): 
+	def glCastRay(self, orig, direction, sceneObj = None): 
 		intercept = None #revisar si hay objeto o no 
 		hit = None  #el que se regresa definitivamente
 		depth= float('inf') #profundidad infinita
 		
 		#se va a recorrer cada objeto en la escena
 		for obj in self.scene:
-			intercept = obj.ray_intersect(orig, direction)
-			#si hay interseccion
-			if intercept != None: 
-				if intercept.distance < depth:
-					hit = intercept
-					depth = intercept.distance
+			if obj != sceneObj:
+				intercept = obj.ray_intersect(orig, direction)
+				#si hay interseccion
+				if intercept != None: 
+					if intercept.distance < depth:
+						hit = intercept
+						depth = intercept.distance
 		return hit
 	
 	

@@ -16,8 +16,10 @@
 from lights import *
 
 class Material(object):
-    def __init__(self, diffuse):
+    def __init__(self, diffuse, spec= 1.0, Ks= 0.0):
         self.diffuse = diffuse
+        self.spec = spec
+        self.Ks = Ks
        
     def GetSurfaceColor(self, intercept, rendered):
         #phong reflection model
@@ -27,9 +29,18 @@ class Material(object):
         finalColor = self.diffuse
         
         for light in rendered.lights: 
-            currentLightColor= light.GetLightColor(intercept)
-            lightColor=[(lightColor[i] +currentLightColor[i]) for i in range(3)]
+            if light.lightType == "Directional":
+                lightDir = [-i for i in light.direction]
+                #origen, direccion de la luz, 
+                shadowIntercept = rendered.glCastRay(intercept.point, lightDir, intercept.obj)
+            if shadowIntercept == None: 
+                currentLightColor= light.GetLightColor(intercept)
+                currentSpecularColor = light.GetSpecularColor(intercept, rendered.camera.translate)
             
+                lightColor=[((lightColor[i] +currentLightColor[i])+ currentLightColor[i]) for i in range(3)]
+            
+            
+
         finalColor= [(finalColor[i] * lightColor[i]) for i in range(3)]
         
         finalColor = [min(1, finalColor[i]) for i in range(3)]
