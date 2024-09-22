@@ -1,6 +1,8 @@
+from re import T
 from Mathlib import *
 import numpy as np
 from intercept import Intercept
+from math import atan, atan2, acos, pi
 #figuras
 
 class Shape(object):
@@ -52,9 +54,14 @@ class Sphere(Shape):
         p = sumVectors(orig, multiplyVectorScalar(dir, t0))
         normal = normalizarVector(subtract(p, self.position))
         
+        u = (atan2(normal[2], normal[0])/(2 * pi)+0.5 )
+        v= acos(normal[1])/pi
+
         return Intercept(point = p, 
                          normal = normal,
                          distance = t0,
+                         texCoords=[u,v],
+                         rayDirection= dir, 
                          obj = self)
     
 

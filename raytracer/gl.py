@@ -4,7 +4,7 @@ from tkinter import SEL
 from typing import Self #para generar tipo de variables con el tamaño especifico
 from camara import Camara
 import numpy as np
-from math import tan, pi, isclose
+from math import tan, pi, isclose, atan2, acos
 from Mathlib import barycentricCoords, normalizarVector
 import pygame
 import random
@@ -26,7 +26,7 @@ def dword(d): #lo que sea de tipo dword, lo va a convertir en 4 bytes
 POINTS = 0
 LINES = 1
 TRIANGLES = 2
-
+MAX_RECURSION_DEPTH = 3
 
 class RendererRT(object):
 	def __init__(self, screen):
@@ -45,8 +45,15 @@ class RendererRT(object):
 
 		self.scene = [] #listado de objetos en la escena
 		self.lights = [] #listado de luces en la escena, para escenas con multiples luces
+		self.envMap = None
+
 		
-	def glCastRay(self, orig, direction, sceneObj = None): 
+	def glCastRay(self, orig, direction, sceneObj = None, recursion = 0): 
+		
+		#para ya no seguir gnerando rayos
+		if recursion >= MAX_RECURSION_DEPTH: 
+			return None
+		
 		intercept = None #revisar si hay objeto o no 
 		hit = None  #el que se regresa definitivamente
 		depth= float('inf') #profundidad infinita
@@ -62,10 +69,6 @@ class RendererRT(object):
 						depth = intercept.distance
 		return hit
 	
-	
-		
-		
-
 	def glRender(self): 
 		indices = [(i, j) for i in range(self.vpWidth) for j in range(self.vpHeight)]
 		random.shuffle(indices)
@@ -93,41 +96,19 @@ class RendererRT(object):
 				#ya hay un origen y una direccion por pixel
 
 				intercept = self.glCastRay(self.camera.translate, dir)
+				
+				color = [0,0,0]
+				
 				#generar el radio por cada uno de los pixeles
+				#si el intercepto es valido se dibuja la superficie si no el envmaap
 				if intercept!= None:
 					color = intercept.obj.material.GetSurfaceColor(intercept, self)
-					self.glPoint(x, y, color)
-					pygame.display.flip()
-
-						
-	"""def glRender(self): 
-		#se tienen que generar los radios por pixel
-		for x in range(self.vpX, self.vpX + self.vpWidth):
-			for y in range(self.vpY, self.vpY + self.vpHeight):
+				else: 
+					color = self.glEnvMapColor(self.camera.translate, dir)
 				
-				if 0<= x < self.width and 0 <= y < self.height:
-					#cooderdenadas normalizadas
-					#que van de -1 a 1
-					#valor del pixel en x
-					pX  = ((x + 0.5 - self.vpX ) /self.vpWidth ) * 2 - 1
-					#valor del pixel en y, se le suma 0.5 para que este en el centro 
-					pY = ((y +0.5  - self.vpY ) /self.vpHeight ) * 2 - 1
-					
-					pX *= self.rightEdge 
-					pY *= self.topEdge
-					
-					#se necesita origen y direccion para dibujar un rayo
-					orig = self.camera.translate #origen de la camara
-					dir = [pX, pY, -self.nearPlane] #direccion de la camara
-					#la direccion su magnitud es 1, por eso se normaliza
-					dir = normalizarVector(dir)
-					#ya hay un origen y una direccion por pixel
+				self.glPoint(x, y, color)	
+				pygame.display.flip()
 
-					#generar el radio por cada uno de los pixeles
-					if self.glCastRay(self.camera.translate, dir):
-						self.glPoint(x, y)
-						pygame.display.flip()"""
-					
 
 	def glViewport(self, x, y, width, height):
 		self.vpX = int(x) #posicion en x
@@ -168,8 +149,18 @@ class RendererRT(object):
 		self.frameBuffer = [[self.clearColor for y in range(self.height)]
 							for x in range(self.width)]
 		
-		self.zbuffer = [[float('inf') for y in range(self.height)]
-					   for x in range(self.width)]
+		# self.zbuffer = [[float('inf') for y in range(self.height)]
+		# 			   for x in range(self.width)]
+
+	def glEnvMapColor(self, orig, dir):
+		if self.envMap: 
+			x = (atan2(dir[2], dir[0])/ (2 * pi) + 0.5)
+			y = acos(-dir[1]) / pi 
+
+			return self.envMap.getColor(x,y)
+
+			
+		return self.clearColor
 	
 
 	def glPoint(self, x, y, color = None):
