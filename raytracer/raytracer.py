@@ -40,6 +40,7 @@ blueMirror = Material(diffuse=[0.5,0.5,1.0], spec =128 ,  Ks=0.2, matType= REFLE
 #crear luces
 rt.lights.append(DirectionalLight(direction = [-1,-1,-1], intensity = 0.4 ) )
 rt.lights.append(DirectionalLight(direction = [1,-0.5,-1], intensity = 0.4, color =[0,0,0] ) )
+#rt.lights.append(DirectionalLight(direction = [0.5,-0.5,-1], intensity = 0.8, color =[1,1,1] ) )
 rt.lights.append(AmbientLight(intensity = 0.1) )
 
 rt.scene.append(Sphere(position = [0,0,-5], radius = 1.5, material = mirror)) #2.5

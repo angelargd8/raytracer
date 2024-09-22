@@ -55,7 +55,7 @@ class Sphere(Shape):
         normal = normalizarVector(subtract(p, self.position))
         
         u = (atan2(normal[2], normal[0])/(2 * pi)+0.5 )
-        v= acos(normal[1])/pi
+        v= acos(-normal[1])/pi
 
         return Intercept(point = p, 
                          normal = normal,
