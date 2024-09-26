@@ -6,8 +6,7 @@
 
     ![Figura](./raytracer/output1.bmp)
 
-    Siento que en la primera imagen no se aprecian tanto los reflectives, 
-    pero considero que en esta se pueden ver mejor: 
+    Siento que en la primera imagen no se aprecian tanto los reflectives, pero considero que en esta se pueden ver mejor: 
     ![Figura](./raytracer/output.bmp)
 
 
