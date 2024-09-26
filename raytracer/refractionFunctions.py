@@ -18,7 +18,8 @@ def refractVector(normal, incident, n1, n2):
 	n = n1 / n2
 	
 	#T = n * (incident + c1 * normal) - normal * (1 - n**2 * (1 - c1**2 )) ** 0.5
-	T = [n * (i + c1 * n) - n * (1 - n**2 * (1 - c1**2))**0.5 for i, n in zip(incident, normal)]
+	#T = [n * (i + c1 * n) - n * (1 - n**2 * (1 - c1**2))**0.5 for i, n in zip(incident, normal)]
+	T = [n * (i + c1 * ni) - ni * (1 - n**2 * (1 - c1**2))**0.5 for i, ni in zip(incident, normal)]
 	
 	#return T / np.linalg.norm(T)
 	#return normalizarVector(T)

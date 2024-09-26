@@ -46,7 +46,7 @@ class DirectionalLight(Light):
             specularity = max(0,ProductoPunto(viewDir, reflect)) ** intercept.obj.material.spec
             specularity *= intercept.obj.material.Ks
             specularity *= self.intensity
-            spectColor = [(i)* specularity for i in specColor]
+            specColor = [(i)* specularity for i in specColor]
             
             
         return specColor

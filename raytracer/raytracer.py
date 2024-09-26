@@ -36,26 +36,30 @@ blueMirror = Material(diffuse=[0.5,0.5,1.0], spec =128 ,  Ks=0.2, matType= REFLE
 # #textures
 elote = Material(texture = Texture('textures/elote.bmp'), spec= 64, Ks = 0.1, matType= OPAQUE)
 sandia = Material(texture = Texture('textures/sandia.bmp'), spec= 64, Ks = 0.1, matType= OPAQUE)
+
 ground = Material(texture = Texture('textures/ground.bmp'), spec= 128, Ks = 0.2, matType= REFLECTIVE)
 library = Material(texture = Texture('textures/library.bmp'), spec= 128, Ks = 0.2, matType= REFLECTIVE)
-plastic = Material(texture = Texture('textures/plastic.bmp'), spec= 128, Ks = 0.2, matType= REFLECTIVE)
 metal = Material(texture = Texture('textures/metal.bmp'), spec= 128, Ks = 0.2, matType= REFLECTIVE)
-marble = Material(texture = Texture('textures/marble.bmp'), spec= 128, Ks = 0.2, matType= REFLECTIVE)
+marble = Material(texture = Texture('textures/marble2.bmp'), spec= 64, Ks = 0.2, matType= REFLECTIVE)
+steel = Material(texture = Texture('textures/steel.bmp'), spec= 128, Ks = 0.2, matType= REFLECTIVE)
+
+plastic = Material(texture = Texture('textures/plastic.bmp'), spec= 128, Ks = 0.3, matType= TRANSPARENT)
+water = Material(texture = Texture('textures/waterR2.bmp'), spec= 128, Ks = 0.3, matType= TRANSPARENT)
 glass = Material(spec= 128, Ks= 0.2 , ior = 1.5, matType=TRANSPARENT)
 
 #crear luces
 rt.lights.append(DirectionalLight(direction = [-1,-1,-1], intensity = 0.4 ) )
 # rt.lights.append(DirectionalLight(direction = [1,-0.5,-1], intensity = 0.4, color =[0,0,0] ) )
 # rt.lights.append(DirectionalLight(direction = [0.5,-0.5,-1], intensity = 0.8, color =[1,1,1] ) )
-rt.lights.append(AmbientLight(intensity = 0.1) )
+rt.lights.append(AmbientLight(intensity = 0.3) )
 
 # rt.scene.append(Sphere(position = [0,0,-5], radius = 1.5, material = glass)) #2.5
-rt.scene.append(Sphere(position = [-5,2,-6], radius = 1.5, material = elote))
-rt.scene.append(Sphere(position = [-5,-2,-6], radius = 1.5, material = sandia))
-rt.scene.append(Sphere(position = [0,2,-5], radius = 1.5, material = ground))
-rt.scene.append(Sphere(position = [0,-2,-5], radius = 1.5, material = plastic))
-rt.scene.append(Sphere(position = [5,2,-6], radius = 1.5, material = metal))
-rt.scene.append(Sphere(position = [5,-2,-6], radius = 1.5, material = marble)) s
+rt.scene.append(Sphere(position = [-3,1.5,-11], radius = 1, material = elote))
+rt.scene.append(Sphere(position = [-3,-1.5,-11], radius = 1, material = sandia))
+rt.scene.append(Sphere(position = [0,1.5,-10], radius = 1, material = plastic))
+rt.scene.append(Sphere(position = [0,-1.5,-10], radius = 1, material = water))
+rt.scene.append(Sphere(position = [3,1.5,-11], radius = 1, material = steel))
+rt.scene.append(Sphere(position = [3,-1.5,-11], radius = 1, material = marble)) 
 
 rt.glRender()
 

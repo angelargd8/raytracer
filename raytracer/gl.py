@@ -122,7 +122,7 @@ class RendererRT(object):
 		self.fov = fov  * pi / 180
 		
 		aspectRatio = self.vpWidth / self.vpHeight
-		self.topEdge = tan(self.fov) * self.nearPlane
+		self.topEdge = tan(self.fov/2) * self.nearPlane
 		self.rightEdge = self.topEdge * aspectRatio
 		
 
