@@ -16,8 +16,8 @@ from texture import Texture
 
 # width = 960
 # height = 960
-width = 256 #256#64
-height = 256
+width = 64 #256#64
+height = 64
 screen = pygame.display.set_mode((width, height), pygame.SCALED)
 clock = pygame.time.Clock()
 
@@ -36,18 +36,15 @@ blueMirror = Material(diffuse=[0.5,0.5,1.0], spec =128 ,  Ks=0.2, matType= REFLE
 # #textures
 # earth = Material(texture = Texture('textures/earthDay.bmp'))
 # marble = Material(texture = Texture('textures/whiteMarble.bmp'), spec= 128, Ks = 0.2, MaskType= REFLECTIVE)
+glass = Material(spec= 128, Ks= 0.2 , ior = 1.5, matType=TRANSPARENT)
 
 #crear luces
 rt.lights.append(DirectionalLight(direction = [-1,-1,-1], intensity = 0.4 ) )
-rt.lights.append(DirectionalLight(direction = [1,-0.5,-1], intensity = 0.4, color =[0,0,0] ) )
-#rt.lights.append(DirectionalLight(direction = [0.5,-0.5,-1], intensity = 0.8, color =[1,1,1] ) )
+# rt.lights.append(DirectionalLight(direction = [1,-0.5,-1], intensity = 0.4, color =[0,0,0] ) )
+# rt.lights.append(DirectionalLight(direction = [0.5,-0.5,-1], intensity = 0.8, color =[1,1,1] ) )
 rt.lights.append(AmbientLight(intensity = 0.1) )
 
-rt.scene.append(Sphere(position = [0,0,-5], radius = 1.5, material = mirror)) #2.5
-rt.scene.append(Sphere(position = [1,1,-3], radius = 0.5, material = blueMirror)) #1
-#con la especularidad se suele usarpotenciasde2
-
-#rt.scene.append(Sphere(position = [2,-3, -10], radius = 0.5, material = grass))
+rt.scene.append(Sphere(position = [0,0,-5], radius = 1.5, material = glass)) #2.5
 
 rt.glRender()
 

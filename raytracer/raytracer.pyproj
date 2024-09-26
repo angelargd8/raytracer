@@ -31,6 +31,7 @@
     <Compile Include="model.py" />
     <Compile Include="obj.py" />
     <Compile Include="raytracer.py" />
+    <Compile Include="refractionFunctions.py" />
     <Compile Include="texture.py" />
   </ItemGroup>
   <ItemGroup>

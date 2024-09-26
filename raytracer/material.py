@@ -15,16 +15,18 @@
 #rayOrigin: origen del rayo
 from lights import *
 from Mathlib import *
+from refractionFunctions import *
 
 OPAQUE = 0
 REFLECTIVE = 1
 TRANSPARENT = 2
 
 class Material(object):
-    def __init__(self, diffuse = [1,1,1], spec= 1.0, Ks= 0.0, texture= None, matType = OPAQUE):
+    def __init__(self, diffuse = [1,1,1], spec= 1.0, Ks= 0.0, ior = 1.0, texture= None, matType = OPAQUE):
         self.diffuse = diffuse
         self.spec = spec
         self.Ks = Ks
+        self.ior= ior
         self.texture = texture
         self.matType = matType
        
@@ -34,6 +36,7 @@ class Material(object):
         # FinalColor = DiffuseColor * LightColors (diffuse * el color de la iluminacion)
         lightColor =[0,0,0]
         reflectColor = [0,0,0]
+        refractColor = [0,0,0]
         finalColor = self.diffuse
 
         if self.texture and intercept.texCoords:
@@ -61,10 +64,44 @@ class Material(object):
                 reflectColor = reflectIntercept.obj.material.GetSurfaceColor(reflectIntercept, rendered, recursion + 1)
             else:
                 reflectColor = rendered.glEnvMapColor(intercept.point, reflect)
+
+        elif self.matType == TRANSPARENT: 
+            #revisar si estamos afuera
+            outside = ProductoPunto(intercept.normal, intercept.rayDirection) < 0
+            #agregar margen de error
+            bias = [i * 0.001 for i in intercept.normal]
             
+            #generamos los rayos de refleccion
+            rayDir = [-i for i in intercept.rayDirection]
+            reflect = reflectVector(intercept.normal, rayDir)
+            reflectOrig = sumVectors(intercept.point, bias) if outside else subtract(intercept.point, bias)
+            reflectIntercept = rendered.glCastRay(reflectOrig, reflect, None, recursion + 1)
+            
+            if reflectIntercept != None:
+                reflectColor = reflectIntercept.obj.material.GetSurfaceColor(reflectIntercept, rendered, recursion + 1)
+            else:
+                reflectColor = rendered.glEnvMapColor(intercept.point, reflect)
+                
+            #generamos los rayos de refraccion
+            if not totalInternalReflection(intercept.normal, intercept.rayDirection,  1.0, self.ior): 
+                refract = refractVector(intercept.normal, intercept.rayDirection, 1.0, self.ior)
+                refractOrig = subtract(intercept.point, bias) if outside else sumVectors(intercept.point, bias)
+                refractIntercept = rendered.glCastRay(refractOrig, refract, None, recursion + 1)
+                
+                if refractIntercept != None:
+                    refractColor = refractIntercept.obj.material.GetSurfaceColor(refractIntercept, rendered, recursion + 1)
+                else:
+                    refractColor = rendered.glEnvMapColor(intercept.point, reflect)
+                
+                #usando las ecuaciones de fresnel, determinamc cuanta refleccion
+                #y cuanta refraccion agregar al color final 
+                Kr, Kt = fresnel(intercept.normal, intercept.rayDirection, 1.0, self.ior)
+                reflectColor = [i * Kr for i in reflectColor]
+                refractColor = [i * Kt for i in refractColor]
+                
 
         
-        finalColor = [(finalColor[i] * (lightColor[i]+reflectColor[i])) for i in range(3)]
+        finalColor = [(finalColor[i] * (lightColor[i]+reflectColor[i]+ refractColor[i])) for i in range(3)]
         finalColor= [min(1,finalColor[i]) for i in range(3)]
 
         return finalColor
