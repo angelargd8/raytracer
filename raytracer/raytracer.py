@@ -16,13 +16,13 @@ from texture import Texture
 
 # width = 960
 # height = 960
-width = 64 #256#64
-height = 64
+width = 256 #256#64
+height = 256
 screen = pygame.display.set_mode((width, height), pygame.SCALED)
 clock = pygame.time.Clock()
 
 rt=  RendererRT(screen)
-rt.envMap = Texture('textures/parkingLot.bmp')
+rt.envMap = Texture('textures/streetNight.bmp')
 #rt.glClearColor(0.5,0.0,0.0)
 rt.glClear()
 
@@ -34,8 +34,13 @@ mirror = Material(diffuse=[0.5,0.5,0.5], spec =128 ,  Ks=0.2, matType= REFLECTIV
 blueMirror = Material(diffuse=[0.5,0.5,1.0], spec =128 ,  Ks=0.2, matType= REFLECTIVE )
 
 # #textures
-# earth = Material(texture = Texture('textures/earthDay.bmp'))
-# marble = Material(texture = Texture('textures/whiteMarble.bmp'), spec= 128, Ks = 0.2, MaskType= REFLECTIVE)
+elote = Material(texture = Texture('textures/elote.bmp'), spec= 64, Ks = 0.1, matType= OPAQUE)
+sandia = Material(texture = Texture('textures/sandia.bmp'), spec= 64, Ks = 0.1, matType= OPAQUE)
+ground = Material(texture = Texture('textures/ground.bmp'), spec= 128, Ks = 0.2, matType= REFLECTIVE)
+library = Material(texture = Texture('textures/library.bmp'), spec= 128, Ks = 0.2, matType= REFLECTIVE)
+plastic = Material(texture = Texture('textures/plastic.bmp'), spec= 128, Ks = 0.2, matType= REFLECTIVE)
+metal = Material(texture = Texture('textures/metal.bmp'), spec= 128, Ks = 0.2, matType= REFLECTIVE)
+marble = Material(texture = Texture('textures/marble.bmp'), spec= 128, Ks = 0.2, matType= REFLECTIVE)
 glass = Material(spec= 128, Ks= 0.2 , ior = 1.5, matType=TRANSPARENT)
 
 #crear luces
@@ -44,10 +49,15 @@ rt.lights.append(DirectionalLight(direction = [-1,-1,-1], intensity = 0.4 ) )
 # rt.lights.append(DirectionalLight(direction = [0.5,-0.5,-1], intensity = 0.8, color =[1,1,1] ) )
 rt.lights.append(AmbientLight(intensity = 0.1) )
 
-rt.scene.append(Sphere(position = [0,0,-5], radius = 1.5, material = glass)) #2.5
+# rt.scene.append(Sphere(position = [0,0,-5], radius = 1.5, material = glass)) #2.5
+rt.scene.append(Sphere(position = [-5,2,-6], radius = 1.5, material = elote))
+rt.scene.append(Sphere(position = [-5,-2,-6], radius = 1.5, material = sandia))
+rt.scene.append(Sphere(position = [0,2,-5], radius = 1.5, material = ground))
+rt.scene.append(Sphere(position = [0,-2,-5], radius = 1.5, material = plastic))
+rt.scene.append(Sphere(position = [5,2,-6], radius = 1.5, material = metal))
+rt.scene.append(Sphere(position = [5,-2,-6], radius = 1.5, material = marble)) s
 
 rt.glRender()
-
 
 isRunning = True
 while isRunning:
@@ -58,10 +68,13 @@ while isRunning:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 isRunning = False
+            elif event.key == pygame.K_S:
+                rt.glGenerateFrameBuffer("output.bmp")
                
+     
    
     pygame.display.flip()
     clock.tick(60)
 
-
+rt.glGenerateFrameBuffer("output.bmp")
 pygame.quit()
