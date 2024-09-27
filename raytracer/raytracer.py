@@ -16,13 +16,13 @@ from texture import Texture
 
 # width = 960
 # height = 960
-width = 256 #256#64
-height = 256
+width = 8 #256#64
+height = 8
 screen = pygame.display.set_mode((width, height), pygame.SCALED)
 clock = pygame.time.Clock()
 
 rt=  RendererRT(screen)
-rt.envMap = Texture('textures/streetNight.bmp')
+rt.envMap = Texture('textures/parkingLot.bmp')
 #rt.glClearColor(0.5,0.0,0.0)
 rt.glClear()
 
@@ -53,13 +53,17 @@ rt.lights.append(DirectionalLight(direction = [-1,-1,-1], intensity = 0.4 ) )
 # rt.lights.append(DirectionalLight(direction = [0.5,-0.5,-1], intensity = 0.8, color =[1,1,1] ) )
 rt.lights.append(AmbientLight(intensity = 0.3) )
 
-# rt.scene.append(Sphere(position = [0,0,-5], radius = 1.5, material = glass)) #2.5
-rt.scene.append(Sphere(position = [-3,1.5,-11], radius = 1, material = elote))
-rt.scene.append(Sphere(position = [-3,-1.5,-11], radius = 1, material = sandia))
-rt.scene.append(Sphere(position = [0,1.5,-10], radius = 1, material = plastic))
-rt.scene.append(Sphere(position = [0,-1.5,-10], radius = 1, material = water))
-rt.scene.append(Sphere(position = [3,1.5,-11], radius = 1, material = steel))
-rt.scene.append(Sphere(position = [3,-1.5,-11], radius = 1, material = marble)) 
+
+# rt.scene.append(Sphere(position = [0,0,-5], radius = 1, material = glass))
+# rt.scene.append(Plane(position = [0,-5,-5], normal = [0,1,0], material = brick))
+# rt.scene.append(Disk(position = [0,-1,-5], normal = [0,1,0], radius = 1.5, material = mirror))
+
+rt.scene.append(AABB(position = [1.5,1.5,-5], sizes = [1,1,1], material = brick))
+# rt.scene.append(AABB(position = [0,1.5,-5], sizes = [1,1,1], material = mirror))
+# rt.scene.append(AABB(position = [0,1.5,-5], sizes = [1,1,1], material = grass))
+# rt.scene.append(AABB(position = [0,1.5,-5], sizes = [1,1,1], material = glass))
+
+
 
 rt.glRender()
 
