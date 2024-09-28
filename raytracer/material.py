@@ -44,10 +44,27 @@ class Material(object):
             finalColor = [(finalColor[i] * textureColor[i]) for i in range(3)]
 
         for light in rendered.lights: 
+            shadowIntercept = None
+            lightDir = None
+
+
             if light.lightType == "Directional":
                 lightDir = [-i for i in light.direction]
-                #origen, direccion de la luz, 
                 shadowIntercept = rendered.glCastRay(intercept.point, lightDir, intercept.obj)
+
+
+            elif  light.lightType == "Point":
+                lightDir = subtract(light.position, intercept.point)
+                R  = magnitudVector(lightDir)
+                lightDir = normalizarVector(lightDir)
+                shadowIntercept = rendered.glCastRay(intercept.point, lightDir, intercept.obj)
+                if shadowIntercept: 
+                    if shadowIntercept.distance >= R:
+                        shadowIntercept = None
+                
+                
+            #origen, direccion de la luz, 
+            #shadowIntercept = rendered.glCastRay(intercept.point, lightDir, intercept.obj)
                 
             if shadowIntercept == None: 
                 lightColor=[(lightColor[i] + light.GetSpecularColor(intercept, rendered.camera.translate)[i]) for i in range(3)]
