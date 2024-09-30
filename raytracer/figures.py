@@ -98,7 +98,7 @@ class Plane(Shape):
         
         
 
-class Disk():
+class Disk(Plane):
     def __init__(self, position, normal, radius, material):
         super().__init__(position, normal ,material)
         self.radius = radius
@@ -109,9 +109,7 @@ class Disk():
         
         if planeIntercept is None:
             return None
-        
-        subtract(planeIntercept.point, self.position)
-        
+                
         contact = magnitudVector(subtract(planeIntercept.point, self.position))
         
         if contact > self.radius:
@@ -126,9 +124,9 @@ class AABB(Shape): #cubo -- estas figuras carecen de rotacion
         self.sizes = sizes
         self.type = "AABB"
 
-        #planos
+        # Planes
         self.planes = []
-            
+
         rightPlane = Plane([self.position[0] + sizes[0]/2, self.position[1], self.position[2]], [1,0,0], material)
         leftPlane = Plane([self.position[0] - sizes[0]/2, self.position[1], self.position[2]], [-1,0,0], material)
 
@@ -137,23 +135,22 @@ class AABB(Shape): #cubo -- estas figuras carecen de rotacion
         downPlane = Plane([self.position[0], self.position[1] - sizes[1]/2, self.position[2]], [0,-1,0], material)
 
         
-        frontPlane = Plane([self.position[0], self.position[1], self.position[2] + sizes[2]/2], [0,0,1], material)
+        fontPlane = Plane([self.position[0], self.position[1], self.position[2] + sizes[2]/2], [0,0,1], material)
         backPlane = Plane([self.position[0], self.position[1] , self.position[2] - sizes[2]/2], [0,0,-1], material)
-
 
         self.planes.append(rightPlane)
         self.planes.append(leftPlane)
         self.planes.append(upPlane)
         self.planes.append(downPlane)
-        self.planes.append(frontPlane)
+        self.planes.append(fontPlane)
         self.planes.append(backPlane)
-            
-        #bounds
+
+        # Bouce
         self.boundsMin = [0,0,0]
         self.boundsMax = [0,0,0]
-            
+
         epsilon = 0.001
-            
+
         for i in range(3):
             self.boundsMin[i] = position[i] - (epsilon + sizes[i]/2)
             self.boundsMax[i] = position[i] + (epsilon + sizes[i]/2)
@@ -179,30 +176,22 @@ class AABB(Shape): #cubo -- estas figuras carecen de rotacion
 
         if intercept == None:
             return None
-        
-        u, v = 0, 0
-        
-        if abs( intercept.normal[0]) > 0:
-            #mapeat las uvs para el eje x, usando las coordenadas Y y Z
+
+        u, v = 0,0
+
+        if abs(intercept.normal[0]) > 0:
+            # Mapear las uvs para el jee x, usando las coordenadas de Y y Z
             u = (intercept.point[1] - self.boundsMin[1]) / self.sizes[1]
             v = (intercept.point[2] - self.boundsMin[2]) / self.sizes[2]
-            
 
-        if abs( intercept.normal[1]) > 0:
-            #mapeat las uvs para el eje y, usando las coordenadas X y Z
+        elif abs(intercept.normal[1]) > 0:
             u = (intercept.point[0] - self.boundsMin[0]) / self.sizes[0]
             v = (intercept.point[2] - self.boundsMin[2]) / self.sizes[2]
-             
 
-        if abs( intercept.normal[2]) > 0:
-            #mapeat las uvs para el eje y, usando las coordenadas X y Z
-            u =  (intercept.point[0] - self.boundsMin[0]) / self.sizes[0]
+        elif abs(intercept.normal[2]) > 0:
+            u = (intercept.point[0] - self.boundsMin[0]) / self.sizes[0]
             v = (intercept.point[1] - self.boundsMin[1]) / self.sizes[1]
-            
-
-        u = min(0.999, max(0, u))
-        v = min(0.999, max(0, v))
-
+        
         return Intercept(point=intercept.point,
                          normal=intercept.normal,
                          distance=t, 

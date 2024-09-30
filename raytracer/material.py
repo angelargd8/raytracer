@@ -39,9 +39,15 @@ class Material(object):
         refractColor = [0,0,0]
         finalColor = self.diffuse
 
+        # if self.texture and intercept.texCoords:
+        #     textureColor =self.texture.getColor(intercept.texCoords[0], intercept.texCoords[1])
+        #     finalColor = [(finalColor[i] * textureColor[i]) for i in range(3)]
+            
+        #validacion que texture y texCoords existan
         if self.texture and intercept.texCoords:
-            textureColor =self.texture.getColor(intercept.texCoords[0], intercept.texCoords[1])
-            finalColor = [(finalColor[i] * textureColor[i]) for i in range(3)]
+            textureColor = self.texture.getColor(intercept.texCoords[0], intercept.texCoords[1])
+            if textureColor is not None:
+                finalColor = [(finalColor[i] * textureColor[i]) for i in range(3)]
 
         for light in rendered.lights: 
             shadowIntercept = None
