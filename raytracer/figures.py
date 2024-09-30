@@ -25,7 +25,7 @@ class Sphere(Shape):
         
     def ray_intersect(self, orig, dir): 
         L = subtract(self.position, orig) #cambiar 
-        # d es el punto m·s cercano al centro de la esfera
+        # d es el punto m√°s cercano al centro de la esfera
         
         tca = ProductoPunto(L, dir)
         
@@ -39,7 +39,7 @@ class Sphere(Shape):
         t0= tca - thc
         t1= tca + thc
         
-        #return d<= self.radius #si d es menor o igual al radio, entonces hay intersecciÛn
+        #return d<= self.radius #si d es menor o igual al radio, entonces hay intersecci√≥n
         
         #cuando esta atrs de la camara
         if t0 <0:
@@ -98,7 +98,7 @@ class Plane(Shape):
         
         
 
-class Disk():
+class Disk(Plane):
     def __init__(self, position, normal, radius, material):
         super().__init__(position, normal ,material)
         self.radius = radius
@@ -110,7 +110,6 @@ class Disk():
         if planeIntercept is None:
             return None
         
-        subtract(planeIntercept.point, self.position)
         
         contact = magnitudVector(subtract(planeIntercept.point, self.position))
         
