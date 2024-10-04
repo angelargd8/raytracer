@@ -15,8 +15,8 @@ from texture import Texture
 #rotacion: rotar un objeto en x, y, z
 # width = 960
 # height = 960
-width = 256 #256#64128
-height = 256
+width = 64 #256#64128
+height = 64
 screen = pygame.display.set_mode((width, height), pygame.SCALED)
 clock = pygame.time.Clock()
 
@@ -69,21 +69,30 @@ rt.lights.append(AmbientLight(intensity = 0.8) )
 # rt.lights.append(PointLight(position = [-2,0,-5]))
 #rt.lights.append(SpotLight(position = [2,0,-5], direction = [-1,0,0])) # direction = [-1,0,0] 
 
-##cuarto
-rt.scene.append(Plane(position = [0,-1,-5], normal = [0,1,0], material = piso)) #piso
-rt.scene.append(Plane(position = [0,0,-5], normal = [0,0,1], material = paredFondo)) #pared
-rt.scene.append(Plane(position = [1.5,0,-5], normal = [-1,0,0], material = paredDerecha)) #pared
-rt.scene.append(Plane(position = [-1.5,0,-5], normal = [1,0,0], material = paredIzquierda)) #pared
-rt.scene.append(Plane(position = [0,1,-5], normal = [0,1,0], material = techo)) #pared
+# ##cuarto
+# rt.scene.append(Plane(position = [0,-1,-5], normal = [0,1,0], material = piso)) #piso
+# rt.scene.append(Plane(position = [0,0,-5], normal = [0,0,1], material = paredFondo)) #pared
+# rt.scene.append(Plane(position = [1.5,0,-5], normal = [-1,0,0], material = paredDerecha)) #pared
+# rt.scene.append(Plane(position = [-1.5,0,-5], normal = [1,0,0], material = paredIzquierda)) #pared
+# rt.scene.append(Plane(position = [0,1,-5], normal = [0,1,0], material = techo)) #pared
+
+#fondo
+# rt.scene.append(Disk(position = [1,1,-5], normal = [1,1,0], radius = 1.5, material = grass))
+# rt.scene.append(Disk(position = [1,1,-5], normal = [1,1,0], radius = 1.5, material = grass))
+rt.scene.append(Pyramid(position=[0,1,-3], height= 0.5 , base_size=0.5 , material= grass))
+
 
 rt.camera.position = [0, 0, 0] 
 
-#objetos 
-rt.scene.append(AABB(position = [0.6,-0.5,-2], sizes = [0.5,0.5,0.5], material = library))
-rt.scene.append(AABB(position = [0,0,-2], sizes = [0.4,0.4,0.4], material = cuadro))
-rt.scene.append(AABB(position = [-0.6,-0.5,-2], sizes = [0.5,0.5,0.5], material = chest))
+#objetos
 
-rt.scene.append(Disk(position = [0,-0.9,-3], normal = [0,1,0], radius = 1.2, material = brick))
+
+
+#objetos --
+# rt.scene.append(AABB(position = [0.6,-0.5,-2], sizes = [0.5,0.5,0.5], material = library))
+# rt.scene.append(AABB(position = [0,0,-2], sizes = [0.4,0.4,0.4], material = cuadro))
+# rt.scene.append(AABB(position = [-0.6,-0.5,-2], sizes = [0.5,0.5,0.5], material = chest))
+# rt.scene.append(Disk(position = [0,-0.9,-3], normal = [0,1,0], radius = 1.2, material = brick))
 
 
 # rt.scene.append(Sphere(position = [-1.5,0,-5], radius = 1, material = brick))
