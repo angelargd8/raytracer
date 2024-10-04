@@ -299,3 +299,102 @@ class Pyramid(Shape):
         if intercept1 and intercept2:
             return intercept1 if intercept1.distance < intercept2.distance else intercept2
         return intercept1 if intercept1 else intercept2
+
+
+
+class TruncatedPyramid(Shape):
+    def __init__(self, position, height, base_size, top_size, material):
+        super().__init__(position, material)
+        self.height = height
+        self.base_size = base_size
+        self.top_size = top_size
+        self.type = "TruncatedPyramid"
+        
+        half_base = base_size / 2
+        half_top = top_size / 2
+        
+        #vertices
+        self.vertices = [
+            [position[0] - half_base, position[1], position[2] - half_base],  
+            [position[0] + half_base, position[1], position[2] - half_base],  
+            [position[0] + half_base, position[1], position[2] + half_base],
+            [position[0] - half_base, position[1], position[2] + half_base], 
+            [position[0] - half_top, position[1] + height, position[2] - half_top],  
+            [position[0] + half_top, position[1] + height, position[2] - half_top],  
+            [position[0] + half_top, position[1] + height, position[2] + half_top],  
+            [position[0] - half_top, position[1] + height, position[2] + half_top]   
+        ]
+        
+        #caras cuadrilateras de la piramide truncada
+        self.faces = [
+            [self.vertices[0], self.vertices[1], self.vertices[5], self.vertices[4]],
+            [self.vertices[1], self.vertices[2], self.vertices[6], self.vertices[5]],
+            [self.vertices[2], self.vertices[3], self.vertices[7], self.vertices[6]],
+            [self.vertices[3], self.vertices[0], self.vertices[4], self.vertices[7]],
+            [self.vertices[0], self.vertices[1], self.vertices[2], self.vertices[3]],
+            [self.vertices[4], self.vertices[5], self.vertices[6], self.vertices[7]] 
+        ]
+        
+        #normal de cada cara
+        self.normals = [self.calculate_normal(face) for face in self.faces]
+    
+    def calculate_normal(self, face):
+        if len(face) == 3 or len(face) == 4:
+            v0, v1, v2 = face[:3]
+            edge1 = subtract(v1, v0)
+            edge2 = subtract(v2, v0)
+            normal = ProductoCruz(edge1, edge2)
+            return normalizarVector(normal)
+        return None
+    
+    def ray_intersect(self, orig, dir):
+        closest_intercept = None
+        for face, normal in zip(self.faces, self.normals):
+            intercept = self.intersect_face(face, normal, orig, dir)
+            if intercept and (closest_intercept is None or intercept.distance < closest_intercept.distance):
+                closest_intercept = intercept
+        return closest_intercept
+    
+    def intersect_face(self, face, normal, orig, dir):
+        if len(face) == 3:
+            return self.ray_triangle_intersect(face, normal, orig, dir)
+        elif len(face) == 4:
+            return self.ray_quad_intersect(face, normal, orig, dir)
+        return None
+    
+    def ray_triangle_intersect(self, triangle, normal, orig, dir):
+        v0, v1, v2 = triangle
+        edge1 = subtract(v1, v0)
+        edge2 = subtract(v2, v0)
+        h = ProductoCruz(dir, edge2)
+        a = ProductoPunto(edge1, h)
+        if -1e-8 < a < 1e-8:
+            return None
+        f = 1.0 / a
+        s = subtract(orig, v0)
+        u = f * ProductoPunto(s, h)
+        if u < 0.0 or u > 1.0:
+            return None
+        q = ProductoCruz(s, edge1)
+        v = f * ProductoPunto(dir, q)
+        if v < 0.0 or u + v > 1.0:
+            return None
+        t = f * ProductoPunto(edge2, q)
+        if t > 1e-8:
+            p = sumVectors(orig, multiplyVectorScalar(dir, t))
+            return Intercept(point=p, 
+                             normal=normal, 
+                             distance=t, 
+                             texCoords=None, 
+                             rayDirection=dir, 
+                             obj=self)
+        return None
+    
+    def ray_quad_intersect(self, quad, normal, orig, dir):
+        triangle1 = [quad[0], quad[1], quad[2]]
+        triangle2 = [quad[0], quad[2], quad[3]]
+        intercept1 = self.ray_triangle_intersect(triangle1, normal, orig, dir)
+        intercept2 = self.ray_triangle_intersect(triangle2, normal, orig, dir)
+        if intercept1 and intercept2:
+            return intercept1 if intercept1.distance < intercept2.distance else intercept2
+        return intercept1 if intercept1 else intercept2

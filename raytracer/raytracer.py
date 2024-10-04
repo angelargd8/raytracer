@@ -79,8 +79,8 @@ rt.lights.append(AmbientLight(intensity = 0.8) )
 #fondo
 # rt.scene.append(Disk(position = [1,1,-5], normal = [1,1,0], radius = 1.5, material = grass))
 # rt.scene.append(Disk(position = [1,1,-5], normal = [1,1,0], radius = 1.5, material = grass))
-rt.scene.append(Pyramid(position=[0,1,-3], height= 0.5 , base_size=0.5 , material= grass))
-
+# rt.scene.append(Pyramid(position=[0,1,-3], height= 0.5 , base_size=0.5 , material= grass)) "####
+rt.scene.append(TruncatedPyramid(position=[0,-1,-3], height=1, base_size=1, top_size=0.5, material=brick))
 
 rt.camera.position = [0, 0, 0] 
 
