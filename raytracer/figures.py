@@ -206,7 +206,6 @@ class Pyramid(Shape):
         self.height = height
         self.base_size = base_size
         self.type = "Pyramid"
-        
         #definir los vertices de la piramide
         half_base = base_size / 2
         self.vertices = [
@@ -214,36 +213,37 @@ class Pyramid(Shape):
             [position[0] + half_base, position[1], position[2] - half_base],  #Bottom-right
             [position[0] + half_base, position[1], position[2] + half_base],  #Top-right
             [position[0] - half_base, position[1], position[2] + half_base],  #Top-left
-            [position[0], position[1] + height, position[2]]  #punta
+            [position[0], position[1] + height, position[2]]  #Punta
         ]
-        
         #definir las caras de la piramide, triangulos xd
         self.faces = [
-            [self.vertices[0], self.vertices[1], self.vertices[4]],  #cara frontal
-            [self.vertices[1], self.vertices[2], self.vertices[4]],  #cara derecha
-            [self.vertices[2], self.vertices[3], self.vertices[4]],  #cara de atras
-            [self.vertices[3], self.vertices[0], self.vertices[4]],  #cara de la izquierda
-            [self.vertices[0], self.vertices[1], self.vertices[2], self.vertices[3]]  #Base
+            [0, 1, 4],  #Cara frontal
+            [1, 2, 4],  #Cara derecha
+            [2, 3, 4],  #Cara de atrás
+            [3, 0, 4],  #Cara de la izquierda
+            [0, 1, 2, 3]  #Base
         ]
-        
         #calcular la normal de cada cara
-        self.normals = [self.calculate_normal(face) for face in self.faces]
-    
+        self.normals = [self.calculate_normal([self.vertices[v] for v in face]) for face in self.faces]
+
+        #Definir las UV para cada cara
+        self.uv_coords = {
+            0: [[0, 0], [1, 0], [0.5, 1]],  #Cara frontal
+            1: [[0, 0], [1, 0], [0.5, 1]],  #Cara derecha
+            2: [[0, 0], [1, 0], [0.5, 1]],  #Cara de atrás
+            3: [[0, 0], [1, 0], [0.5, 1]],  #Cara de la izquierda
+            4: [[0, 0], [1, 0], [1, 1], [0, 1]]  #Base
+        }
+
     def calculate_normal(self, face):
-        if len(face) == 3:
-            v0, v1, v2 = face
+        if len(face) == 3 or len(face) == 4:
+            v0, v1, v2 = face[:3]
             edge1 = subtract(v1, v0)
             edge2 = subtract(v2, v0)
             normal = ProductoCruz(edge1, edge2)
             return normalizarVector(normal)
-        elif len(face) == 4:
-            v0, v1, v2, v3 = face
-            edge1 = subtract(v1, v0)
-            edge2 = subtract(v3, v0)
-            normal = ProductoCruz(edge1, edge2)
-            return normalizarVector(normal)
         return None
-    
+
     def ray_intersect(self, orig, dir):
         closest_intercept = None
         for face, normal in zip(self.faces, self.normals):
@@ -251,18 +251,23 @@ class Pyramid(Shape):
             if intercept and (closest_intercept is None or intercept.distance < closest_intercept.distance):
                 closest_intercept = intercept
         return closest_intercept
-    
+
     def intersect_face(self, face, normal, orig, dir):
         #ray-triangle intersection para cada cara del triangulo
-        if len(face) == 3:
-            return self.ray_triangle_intersect(face, normal, orig, dir)
         # ray-quad intersection para cada cara del triangulo
-        elif len(face) == 4:
-            return self.ray_quad_intersect(face, normal, orig, dir)
+        if len(face) == 4:
+            triangle1 = face[0:3]
+            triangle2 = [face[0], face[2], face[3]]
+            intercept1 = self.ray_triangle_intersect(triangle1, normal, orig, dir, self.uv_coords[self.faces.index(face)])
+            intercept2 = self.ray_triangle_intersect(triangle2, normal, orig, dir, self.uv_coords[self.faces.index(face)])
+            return intercept1 if intercept1 and (intercept2 is None or intercept1.distance < intercept2.distance) else intercept2
+        elif len(face) == 3:
+            return self.ray_triangle_intersect(face, normal, orig, dir, self.uv_coords[self.faces.index(face)])
         return None
-    
-    def ray_triangle_intersect(self, triangle, normal, orig, dir):
-        v0, v1, v2 = triangle
+
+    def ray_triangle_intersect(self, triangle, normal, orig, dir, uv_coords):
+        v0, v1, v2 = [self.vertices[i] for i in triangle]
+        uv0, uv1, uv2 = uv_coords[:3]
         edge1 = subtract(v1, v0)
         edge2 = subtract(v2, v0)
         h = ProductoCruz(dir, edge2)
@@ -281,24 +286,21 @@ class Pyramid(Shape):
         t = f * ProductoPunto(edge2, q)
         if t > 1e-8:
             p = sumVectors(orig, multiplyVectorScalar(dir, t))
-            
+            w0 = 1 - u - v
+            tex_coords = self.interpolate_uv(uv0, uv1, uv2, w0, u, v)
             return Intercept(point=p, 
                              normal=normal, 
                              distance=t, 
-                             texCoords=None, 
+                             texCoords=tex_coords, 
                              rayDirection=dir, 
                              obj=self)
         return None
-    
-    def ray_quad_intersect(self, quad, normal, orig, dir):
-        # dividir el  quad en dos triangulos y ver la interseccion
-        triangle1 = [quad[0], quad[1], quad[2]]
-        triangle2 = [quad[0], quad[2], quad[3]]
-        intercept1 = self.ray_triangle_intersect(triangle1, normal, orig, dir)
-        intercept2 = self.ray_triangle_intersect(triangle2, normal, orig, dir)
-        if intercept1 and intercept2:
-            return intercept1 if intercept1.distance < intercept2.distance else intercept2
-        return intercept1 if intercept1 else intercept2
+
+    def interpolate_uv(self, uv0, uv1, uv2, w0, w1, w2):
+        u = w0 * uv0[0] + w1 * uv1[0] + w2 * uv2[0]
+        v = w0 * uv0[1] + w1 * uv1[1] + w2 * uv2[1]
+        return [u, v]
+
 
 
 
@@ -322,21 +324,29 @@ class TruncatedPyramid(Shape):
             [position[0] - half_top, position[1] + height, position[2] - half_top],  
             [position[0] + half_top, position[1] + height, position[2] - half_top],  
             [position[0] + half_top, position[1] + height, position[2] + half_top],  
-            [position[0] - half_top, position[1] + height, position[2] + half_top]   
+            [position[0] - half_top, position[1] + height, position[2] + half_top]
         ]
-        
+        #Definir las UV para cada cara
+        self.uv_coords = {
+            0: [[0, 0], [1, 0], [1, 1], [0, 1]],  #Base inferior
+            1: [[0, 0], [1, 0], [1, 1], [0, 1]],  #Cara lateral 1
+            2: [[0, 0], [1, 0], [1, 1], [0, 1]],  #Cara lateral 2
+            3: [[0, 0], [1, 0], [1, 1], [0, 1]],  #Cara lateral 3
+            4: [[0, 0], [1, 0], [1, 1], [0, 1]],  #Cara lateral 4
+            5: [[0, 0], [1, 0], [1, 1], [0, 1]]   #Base superior
+        }
         #caras cuadrilateras de la piramide truncada
         self.faces = [
-            [self.vertices[0], self.vertices[1], self.vertices[5], self.vertices[4]],
-            [self.vertices[1], self.vertices[2], self.vertices[6], self.vertices[5]],
-            [self.vertices[2], self.vertices[3], self.vertices[7], self.vertices[6]],
-            [self.vertices[3], self.vertices[0], self.vertices[4], self.vertices[7]],
-            [self.vertices[0], self.vertices[1], self.vertices[2], self.vertices[3]],
-            [self.vertices[4], self.vertices[5], self.vertices[6], self.vertices[7]] 
+            [0, 1, 5, 4], 
+            [1, 2, 6, 5], 
+            [2, 3, 7, 6], 
+            [3, 0, 4, 7], 
+            [0, 1, 2, 3], 
+            [4, 5, 6, 7]
         ]
         
         #normal de cada cara
-        self.normals = [self.calculate_normal(face) for face in self.faces]
+        self.normals = [self.calculate_normal([self.vertices[v] for v in face]) for face in self.faces]
     
     def calculate_normal(self, face):
         if len(face) == 3 or len(face) == 4:
@@ -346,7 +356,7 @@ class TruncatedPyramid(Shape):
             normal = ProductoCruz(edge1, edge2)
             return normalizarVector(normal)
         return None
-    
+
     def ray_intersect(self, orig, dir):
         closest_intercept = None
         for face, normal in zip(self.faces, self.normals):
@@ -354,16 +364,19 @@ class TruncatedPyramid(Shape):
             if intercept and (closest_intercept is None or intercept.distance < closest_intercept.distance):
                 closest_intercept = intercept
         return closest_intercept
-    
+
     def intersect_face(self, face, normal, orig, dir):
-        if len(face) == 3:
-            return self.ray_triangle_intersect(face, normal, orig, dir)
-        elif len(face) == 4:
-            return self.ray_quad_intersect(face, normal, orig, dir)
+        if len(face) == 4:
+            triangle1 = face[0:3]
+            triangle2 = [face[0], face[2], face[3]]
+            intercept1 = self.ray_triangle_intersect(triangle1, normal, orig, dir, self.uv_coords[self.faces.index(face)])
+            intercept2 = self.ray_triangle_intersect(triangle2, normal, orig, dir, self.uv_coords[self.faces.index(face)])
+            return intercept1 if intercept1 and (intercept2 is None or intercept1.distance < intercept2.distance) else intercept2
         return None
-    
-    def ray_triangle_intersect(self, triangle, normal, orig, dir):
-        v0, v1, v2 = triangle
+
+    def ray_triangle_intersect(self, triangle, normal, orig, dir, uv_coords):
+        v0, v1, v2 = [self.vertices[i] for i in triangle]
+        uv0, uv1, uv2 = uv_coords[:3]
         edge1 = subtract(v1, v0)
         edge2 = subtract(v2, v0)
         h = ProductoCruz(dir, edge2)
@@ -382,19 +395,17 @@ class TruncatedPyramid(Shape):
         t = f * ProductoPunto(edge2, q)
         if t > 1e-8:
             p = sumVectors(orig, multiplyVectorScalar(dir, t))
+            w0 = 1 - u - v
+            tex_coords = self.interpolate_uv(uv0, uv1, uv2, w0, u, v)
             return Intercept(point=p, 
                              normal=normal, 
                              distance=t, 
-                             texCoords=None, 
+                             texCoords=tex_coords, 
                              rayDirection=dir, 
                              obj=self)
         return None
-    
-    def ray_quad_intersect(self, quad, normal, orig, dir):
-        triangle1 = [quad[0], quad[1], quad[2]]
-        triangle2 = [quad[0], quad[2], quad[3]]
-        intercept1 = self.ray_triangle_intersect(triangle1, normal, orig, dir)
-        intercept2 = self.ray_triangle_intersect(triangle2, normal, orig, dir)
-        if intercept1 and intercept2:
-            return intercept1 if intercept1.distance < intercept2.distance else intercept2
-        return intercept1 if intercept1 else intercept2
+
+    def interpolate_uv(self, uv0, uv1, uv2, w0, w1, w2):
+        u = w0 * uv0[0] + w1 * uv1[0] + w2 * uv2[0]
+        v = w0 * uv0[1] + w1 * uv1[1] + w2 * uv2[1]
+        return [u, v]

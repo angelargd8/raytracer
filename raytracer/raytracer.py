@@ -15,13 +15,13 @@ from texture import Texture
 #rotacion: rotar un objeto en x, y, z
 # width = 960
 # height = 960
-width = 64 #256#64128
-height = 64
+width = 256 #256#64128
+height = 256
 screen = pygame.display.set_mode((width, height), pygame.SCALED)
 clock = pygame.time.Clock()
 
 rt=  RendererRT(screen)
-#rt.envMap = Texture('textures/parkingLot.bmp')
+rt.envMap = Texture('textures/metro.bmp')
 #rt.glClearColor(0.5,0.0,0.0)
 rt.glClear()
 
@@ -32,8 +32,6 @@ techo = Material(diffuse = [1.0, 0.8, 1.0], spec = 128,Ks= 0.25)
 paredIzquierda = Material(diffuse = [1.0, 1.0, 1.0], spec = 128,Ks= 0.5)
 paredDerecha = Material(diffuse = [1.0, 1.0, 1.0], spec = 128,Ks= 0.5)
 paredFondo = Material(diffuse = [1.0, 0.6, 1.0], spec = 128,Ks= 0.25)
-
-
 
 grass = Material(diffuse = [0.2, 1.0, 0.2],spec = 64,Ks= 0.2)
 
@@ -47,6 +45,11 @@ box = Material(texture = Texture('textures/woodenBox.bmp'), spec= 64, Ks = 0.5, 
 library = Material(texture = Texture('textures/library.bmp'), spec= 0, Ks = 0.5, matType= OPAQUE)
 chest = Material(texture = Texture('textures/chest.bmp'), spec= 0, Ks = 0.5, matType= OPAQUE)
 cuadro = Material(texture = Texture('textures/cuadro.bmp'), spec= 0, Ks = 0.5, matType= OPAQUE)
+sand = Material(texture = Texture('textures/sand.bmp'), spec= 0, Ks = 0.5, matType= OPAQUE)
+brick1 = Material(texture = Texture('textures/brick1.bmp'), spec= 0, Ks = 0.5, matType= OPAQUE)
+brick2 = Material(texture = Texture('textures/brick2.bmp'), spec= 0, Ks = 0.5, matType= OPAQUE)
+
+
 
 
 
@@ -71,21 +74,26 @@ rt.lights.append(AmbientLight(intensity = 0.8) )
 
 # ##cuarto
 # rt.scene.append(Plane(position = [0,-1,-5], normal = [0,1,0], material = piso)) #piso
-# rt.scene.append(Plane(position = [0,0,-5], normal = [0,0,1], material = paredFondo)) #pared
-# rt.scene.append(Plane(position = [1.5,0,-5], normal = [-1,0,0], material = paredDerecha)) #pared
+#rt.scene.append(Plane(position = [0,0,-5], normal = [0,0,1], material = paredFondo)) #pared
+# rt.scene.append(Plane(position = [1.5,0,-5], normal = [-1,0,0], material = paredDerecha)) #pareds
 # rt.scene.append(Plane(position = [-1.5,0,-5], normal = [1,0,0], material = paredIzquierda)) #pared
 # rt.scene.append(Plane(position = [0,1,-5], normal = [0,1,0], material = techo)) #pared
 
 #fondo
+#rt.scene.append(Disk(position = [1,1,-5], normal = [1,1,0], radius = 1.5, material = grass))
 # rt.scene.append(Disk(position = [1,1,-5], normal = [1,1,0], radius = 1.5, material = grass))
-# rt.scene.append(Disk(position = [1,1,-5], normal = [1,1,0], radius = 1.5, material = grass))
-# rt.scene.append(Pyramid(position=[0,1,-3], height= 0.5 , base_size=0.5 , material= grass)) "####
-rt.scene.append(TruncatedPyramid(position=[0,-1,-3], height=1, base_size=1, top_size=0.5, material=brick))
 
 rt.camera.position = [0, 0, 0] 
 
 #objetos
+rt.scene.append(Pyramid(position=[-0.9,-0.5,-3], height= 0.3 , base_size=0.3 , material= plastic)) 
+rt.scene.append(TruncatedPyramid(position=[-0.9,-1,-3], height=0.3, base_size=0.3, top_size=0.1, material=plastic))
 
+rt.scene.append(Pyramid(position=[-0.1,-0.3,-3], height= 0.5 , base_size=0.5 , material= marble)) 
+rt.scene.append(TruncatedPyramid(position=[-0.1,-1,-3], height=0.5, base_size=0.5, top_size=0.3, material=marble))
+
+rt.scene.append(Pyramid(position=[0.8,0,-3], height=0.8 , base_size=0.8 , material= brick1)) 
+rt.scene.append(TruncatedPyramid(position=[0.8,-1,-3], height=0.8, base_size=0.8, top_size=0.5, material=brick1))
 
 
 #objetos --
