@@ -7,7 +7,7 @@
     ![Imagen](./raytracer/output.bmp)
 
 - Luces: 
-    - Se uso una luz ambiental verde para que la figura se viera verde.
+    - Se uso una luz ambiental verde para que la figura se vea verde y otras luces de direccion.
 - Objetos: 
     - Piramide
     - Piramide truncada
