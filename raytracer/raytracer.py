@@ -1,5 +1,4 @@
-
-
+from dis import disco
 import pygame
 from pygame.locals import *
 from pygame.mask import MaskType
@@ -21,7 +20,7 @@ screen = pygame.display.set_mode((width, height), pygame.SCALED)
 clock = pygame.time.Clock()
 
 rt=  RendererRT(screen)
-rt.envMap = Texture('textures/metro.bmp')
+rt.envMap = Texture('textures/land.bmp')
 #rt.glClearColor(0.5,0.0,0.0)
 rt.glClear()
 
@@ -31,9 +30,12 @@ piso = Material(diffuse = [1.0, 0.8, 1.0], spec = 128,Ks= 0.25)
 techo = Material(diffuse = [1.0, 0.8, 1.0], spec = 128,Ks= 0.25)
 paredIzquierda = Material(diffuse = [1.0, 1.0, 1.0], spec = 128,Ks= 0.5)
 paredDerecha = Material(diffuse = [1.0, 1.0, 1.0], spec = 128,Ks= 0.5)
-paredFondo = Material(diffuse = [1.0, 0.6, 1.0], spec = 128,Ks= 0.25)
+paredFondo = Material(diffuse = [0.85, 1, 0.85], spec = 4,Ks= 0.25) # [0.5, 1, 0.5]
 
 grass = Material(diffuse = [0.2, 1.0, 0.2],spec = 64,Ks= 0.2)
+blanco = Material(diffuse = [1.0, 1.0, 1.0],spec = 64,Ks= 0.2)
+black = Material(diffuse = [0, 0, 0],spec = 64,Ks= 0.2)
+
 
 mirror = Material(diffuse=[0.5,0.5,0.5], spec =128 ,  Ks=0.2, matType= REFLECTIVE )
 blueMirror = Material(diffuse=[0.5,0.5,1.0], spec =128 ,  Ks=0.2, matType= REFLECTIVE )
@@ -46,12 +48,8 @@ library = Material(texture = Texture('textures/library.bmp'), spec= 0, Ks = 0.5,
 chest = Material(texture = Texture('textures/chest.bmp'), spec= 0, Ks = 0.5, matType= OPAQUE)
 cuadro = Material(texture = Texture('textures/cuadro.bmp'), spec= 0, Ks = 0.5, matType= OPAQUE)
 sand = Material(texture = Texture('textures/sand.bmp'), spec= 0, Ks = 0.5, matType= OPAQUE)
-brick1 = Material(texture = Texture('textures/brick1.bmp'), spec= 0, Ks = 0.5, matType= OPAQUE)
+brick1 = Material(texture = Texture('textures/brick1.bmp'), spec= 64, Ks = 0.5, matType= OPAQUE)
 brick2 = Material(texture = Texture('textures/brick2.bmp'), spec= 0, Ks = 0.5, matType= OPAQUE)
-
-
-
-
 
 ground = Material(texture = Texture('textures/ground.bmp'), spec= 128, Ks = 0.2, matType= REFLECTIVE)
 metal = Material(texture = Texture('textures/metal.bmp'), spec= 128, Ks = 0.2, matType= REFLECTIVE)
@@ -65,16 +63,16 @@ window = Material(texture = Texture('textures/window.bmp'), spec= 256, Ks = 0.6,
 glass = Material(spec= 128, Ks= 0.2 , ior = 1.5, matType=TRANSPARENT)
 
 #crear luces
-#rt.lights.append(DirectionalLight(direction = [-1,-1,-1], intensity = 0.4 ) )
-# rt.lights.append(DirectionalLight(direction = [1,-0.5,-1], intensity = 0.4, color =[0,0,0] ) )
-# rt.lights.append(DirectionalLight(direction = [0.5,-0.5,-1], intensity = 0.8, color =[1,1,1] ) )
-rt.lights.append(AmbientLight(intensity = 0.8) )
-# rt.lights.append(PointLight(position = [-2,0,-5]))
-#rt.lights.append(SpotLight(position = [2,0,-5], direction = [-1,0,0])) # direction = [-1,0,0] 
+rt.lights.append(DirectionalLight(direction = [-1,-1,-1], intensity = 0.4 ) ) ##
+rt.lights.append(DirectionalLight(direction = [1,-0.5,-1], intensity = 0.4, color =[0,0,0] ) )
+rt.lights.append(DirectionalLight(direction = [0.5,-0.5,-1], intensity = 0.8, color =[1,1,1] ) )
+rt.lights.append(AmbientLight(color = [0.5, 1, 0.5], intensity = 1) ) ##
+#rt.lights.append(PointLight(position = [0,1,-1])) ##
+rt.lights.append(SpotLight(position = [2,0,-1], direction = [-1,0,0]))  ##
 
 # ##cuarto
-# rt.scene.append(Plane(position = [0,-1,-5], normal = [0,1,0], material = piso)) #piso
-#rt.scene.append(Plane(position = [0,0,-5], normal = [0,0,1], material = paredFondo)) #pared
+#rt.scene.append(Plane(position = [0,-1,-5], normal = [0,1,0], material = piso)) #piso
+ #pared
 # rt.scene.append(Plane(position = [1.5,0,-5], normal = [-1,0,0], material = paredDerecha)) #pareds
 # rt.scene.append(Plane(position = [-1.5,0,-5], normal = [1,0,0], material = paredIzquierda)) #pared
 # rt.scene.append(Plane(position = [0,1,-5], normal = [0,1,0], material = techo)) #pared
@@ -86,14 +84,56 @@ rt.lights.append(AmbientLight(intensity = 0.8) )
 rt.camera.position = [0, 0, 0] 
 
 #objetos
-rt.scene.append(Pyramid(position=[-0.9,-0.5,-3], height= 0.3 , base_size=0.3 , material= plastic)) 
-rt.scene.append(TruncatedPyramid(position=[-0.9,-1,-3], height=0.3, base_size=0.3, top_size=0.1, material=plastic))
+#pared
+# rt.scene.append(Plane(position = [0,0,-15], normal = [0,0,1], material = elote))
+#circulos 
+# rt.scene.append(Disk(position = [0.9,0,-11], normal = [1,0,1], radius = 5.6, material = blanco))
+# rt.scene.append(Disk(position = [0.6,0,-10], normal = [1,0,1], radius = 4.6, material = elote))
 
-rt.scene.append(Pyramid(position=[-0.1,-0.3,-3], height= 0.5 , base_size=0.5 , material= marble)) 
-rt.scene.append(TruncatedPyramid(position=[-0.1,-1,-3], height=0.5, base_size=0.5, top_size=0.3, material=marble))
 
-rt.scene.append(Pyramid(position=[0.8,0,-3], height=0.8 , base_size=0.8 , material= brick1)) 
-rt.scene.append(TruncatedPyramid(position=[0.8,-1,-3], height=0.8, base_size=0.8, top_size=0.5, material=brick1))
+# rt.scene.append(Plane(position = [0,-1,-5], normal = [0,1,0], material = piso)) #piso
+
+#---------proyecto------------
+
+#piramides
+rt.scene.append(Pyramid( position=[-0.2,0.4,-6], height= 1.5 , base_size=1.2 , material= brick1) ) 
+rt.scene.append(TruncatedPyramid( position=[-0.2,-2,-6], height=2, base_size=2.4, top_size=1.2, material=brick1  ))
+
+#ojo
+rt.scene.append(Disk(position = [-0.1,0.51,-3], normal = [0,1,0], radius = 0.17, material = blanco))
+rt.scene.append(Disk(position = [-0.1,0.5,-3], normal = [0,1,0], radius = 0.18, material = blanco))
+rt.scene.append(Disk(position = [-0.1,0.48,-3], normal = [0,1,0], radius = 0.19, material = blanco))
+rt.scene.append(Disk(position = [-0.1,0.46,-3], normal = [0,1,0], radius = 0.2, material = blanco))
+rt.scene.append(Disk(position = [-0.1,0.44,-3], normal = [0,1,0], radius = 0.2, material = blanco))
+rt.scene.append(Disk(position = [-0.1,0.43,-3], normal = [0,1,0], radius = 0.19, material = blanco))
+rt.scene.append(Disk(position = [-0.1,0.41,-3], normal = [0,1,0], radius = 0.18, material = blanco))
+rt.scene.append(Disk(position = [-0.1,0.40,-3], normal = [0,1,0], radius = 0.17, material = blanco))
+rt.scene.append(Sphere(position = [-0.08,0.31,-2], radius = 0.1, material = metal))
+
+#portal (en mi mente jajaj)
+rt.scene.append(Disk(position = [-0.1,-2.4,-7], normal = [0,1,0], radius = 2.8, material = mirror))
+#sombrero
+rt.scene.append(Cylinder(position = [-0.1,0.8,-3], radius=0.15, height=0.1, material=black))
+rt.scene.append(Cylinder(position = [-0.1,0.8,-3], radius=0.1, height=0.25, material=black))
+
+#esferas random 
+rt.scene.append(Sphere(position = [1.5,5,-10], radius = 1, material = library))
+rt.scene.append(Sphere(position = [3.5,4,-10], radius = 1, material = steel))
+rt.scene.append(Sphere(position = [-1.5,5,-10], radius = 1, material = library))
+rt.scene.append(Sphere(position = [-3.5,4,-10], radius = 1, material = steel))
+rt.scene.append(Sphere(position = [5,-2,-10], radius = 1, material = elote))
+rt.scene.append(Sphere(position = [-3.5,-1.9,-10], radius = 1, material = sandia))
+rt.scene.append(Sphere(position = [-4,-2,-10], radius = 0.8, material = sandia))
+
+# rt.scene.append(Cone(position = [-3.3,-2,-13], radius=1, height=1, material=brick2))
+# rt.scene.append(Cone(position = [-4.5,-2,-13], radius=1, height=1, material=marble))
+rt.scene.append(Cone(position = [3,-2,-10], radius=1, height=1, material=ground))
+rt.scene.append(AABB(position = [3,-0.5,-12], sizes = [0.5,0.5,0.5], material = chest))
+
+#--------------------------------------------
+##
+# rt.lights.append(PointLight(position = [0,2,-1]))
+# rt.lights.append(SpotLight(position = [2,3,-1], direction = [-1,0,0]))  ##
 
 
 #objetos --

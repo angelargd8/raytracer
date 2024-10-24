@@ -98,7 +98,7 @@ def multiplicacionMatrizVector(matriz, vector):
                 for j in range(len(vector)):
                         resultado[i] += matriz[i][j] * vector[j]
             return resultado
-   except Exception: 
+   except Exception as e: 
        print("no se puede multiplicar")
        return None
 
@@ -253,3 +253,16 @@ def divideVectorScalar(v, scalar):
         raise ValueError("Cannot divide by zero")
     return [x / scalar for x in v]
 
+
+
+def subtractVectors(v1, v2):
+    if len(v1) != len(v2):
+        raise ValueError("Both vectors must have the same length")
+
+    
+    result = [v1[i] - v2[i] for i in range(len(v1))]
+    
+    return result
+
+def transposeMatrix(m):
+    return [[m[j][i] for j in range(len(m))] for i in range(len(m[0]))]

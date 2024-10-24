@@ -2,7 +2,7 @@ from re import T
 from Mathlib import *
 import numpy as np
 from intercept import Intercept
-from math import atan, atan2, acos, pi, isclose
+from math import atan, atan2, acos, pi, isclose, sqrt
 #figuras
 
 class Shape(object):
@@ -19,7 +19,7 @@ class Shape(object):
 class Sphere(Shape):
     def __init__(self, position, radius, material): 
         super().__init__( position, material)
-        self.radius = radius
+        self.radius = (radius/2)
         self.material = material
         self.type = "Sphere"
         
@@ -68,8 +68,8 @@ class Sphere(Shape):
 class Plane(Shape):
     def __init__(self, position, normal, material):
         super().__init__(position, material)
-        self.normal = normal 
-        normalizarVector(self.normal)
+        self.normal = normalizarVector(normal)
+        # normalizarVector(self.normal)
         self.type = "Plane"
     
     def ray_intersect(self, orig, dir):
@@ -89,6 +89,14 @@ class Plane(Shape):
         # P = orig + dir * t0
         P = sumVectors(orig, multiplyVectorScalar(dir, t))
         
+        u = (P[0] - self.position[0]) % 1
+        v = (P[2] - self.position[2]) % 1
+        
+        if self.material.texture:
+            tex_color = self.material.texture.getColor(u, v)
+        else:
+            tex_color = self.material.diffuse
+        
         return Intercept(point = P, 
                          normal = self.normal,
                          distance = t,
@@ -100,7 +108,7 @@ class Plane(Shape):
 
 class Disk(Plane):
     def __init__(self, position, normal, radius, material):
-        super().__init__(position, normal ,material)
+        super().__init__(position, normal, material)
         self.radius = radius
         self.type = "Disk"
         
@@ -110,12 +118,24 @@ class Disk(Plane):
         if planeIntercept is None:
             return None
                 
-        contact = magnitudVector(subtract(planeIntercept.point, self.position))
+        contact = subtract(planeIntercept.point, self.position)
+        distance = magnitudVector(contact)
         
-        if contact > self.radius:
+        if distance > self.radius:
             return None
+        
+        # Calcular coordenadas UV
+        u = (contact[0] / self.radius + 1) / 2
+        v = (contact[1] / self.radius + 1) / 2
+        
+        return Intercept(point=planeIntercept.point, 
+                         normal=self.normal, 
+                         distance=planeIntercept.distance, 
+                         texCoords=[u, v], 
+                         rayDirection=dir, 
+                         obj=self)
 
-        return planeIntercept
+
     
 class AABB(Shape): #cubo -- estas figuras carecen de rotacion
     # axis aligned bounding box - alineado de los ejes - bounding box caja sin limites
@@ -409,3 +429,97 @@ class TruncatedPyramid(Shape):
         u = w0 * uv0[0] + w1 * uv1[0] + w2 * uv2[0]
         v = w0 * uv0[1] + w1 * uv1[1] + w2 * uv2[1]
         return [u, v]
+    
+
+class Cone(Shape):
+    def __init__(self, position, radius, height, material):
+        super().__init__(position, material)
+        self.radius = radius
+        self.height = height
+        self.type = "Cone"
+        
+    def ray_intersect(self, orig, dir):
+        oc= subtractVectors(orig, self.position)
+        
+        k= (self.radius / self.height) ** 2
+        a= dir[0]**2 + dir[2]**2 - k * dir[1]**2
+        b= 2 * (oc[0] * dir[0] + oc[2] * dir[2] - k * oc[1] * dir[1])
+        c= oc[0]**2 + oc[2]**2 - k * oc[1]**2
+        
+        discriminant = b**2 - 4 * a * c
+        
+        if discriminant < 0:
+            return None
+        
+        sqrt_discriminant = sqrt(discriminant)
+        t0= (-b - sqrt_discriminant) / (2 * a)
+        t1= (-b + sqrt_discriminant) / (2 * a)
+        
+        if t0 < 0:
+            t0 = t1
+        if t0 < 0:
+            return None
+        
+        y0 = oc[1] + t0 * dir[1]
+        
+        if y0 < 0 or y0 >  self.height:
+            return None
+        
+        P = sumVectors( orig, multiplyVectorScalar(dir, t0))
+        normal = normalizarVector([P[0]- self.position[0], -self.radius / self.height, P[2] - self.position[2]])
+        
+        u = (atan2(normal[2], normal[0])/ (2 * pi)) + 0.5
+        v = y0 / self.height
+        
+        return Intercept(point=P, 
+                         normal=normal, 
+                         distance=t0, 
+                         texCoords=[u, v], 
+                         rayDirection=dir, 
+                         obj=self)
+
+class Cylinder(Shape):
+    def __init__(self, position, radius, height, material):
+        super().__init__(position, material)
+        self.radius = radius
+        self.height = height
+        self.type = "Cylinder"
+        
+    def ray_intersect(self, orig, dir):
+        oc = subtractVectors(orig, self.position)
+        
+        a= dir[0]**2 + dir[2]**2
+        b= 2 * (oc[0] * dir[0] + oc[2] * dir[2])
+        c= oc[0]**2 + oc[2]**2 - self.radius**2
+        
+        discriminant = b**2 - 4 * a * c
+        
+        if discriminant < 0:
+            return None
+        
+        sqrt_discriminant = sqrt(discriminant)
+        t0= (-b - sqrt_discriminant) / (2 * a)
+        t1= (-b + sqrt_discriminant) / (2 * a)
+        
+        if t0 < 0:
+            t0 = t1
+        if t0 < 0:
+            return None
+        
+        y0 = oc[1] + t0 * dir[1]
+        
+        if y0 < 0 or y0 > self.height:
+            return None
+        
+        P = sumVectors(orig, multiplyVectorScalar(dir, t0))
+        normal = normalizarVector([P[0] - self.position[0], 0, P[2] - self.position[2]])
+        
+        u = (atan2(normal[2], normal[0]) / (2 * pi)) + 0.5
+        v = y0 / self.height
+        
+        return Intercept(point=P, 
+                         normal=normal, 
+                         distance=t0, 
+                         texCoords=[u, v], 
+                         rayDirection=dir, 
+                         obj=self)
