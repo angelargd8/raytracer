@@ -246,3 +246,10 @@ def reflectVector(normal, direccion):
     reflect = subtract(reflect, direccion)
     reflect = normalizarVector(reflect)
     return reflect# subtract(direccion, multiplyVectorScalar(normal, 2 * ProductoPunto(direccion, normal)))
+
+
+def divideVectorScalar(v, scalar):
+    if scalar == 0:
+        raise ValueError("Cannot divide by zero")
+    return [x / scalar for x in v]
+

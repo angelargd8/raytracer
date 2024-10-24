@@ -1,7 +1,7 @@
 #aqui se va a guardar la informacion 
 from obj import Obj
 from Mathlib import *
-
+from texture import Texture
 
 class Model(object):
     def __init__(self, filename):
